@@ -1,0 +1,40 @@
+venv/
+
+# Environments
+.env
+.env.local
+.env.production
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+*.log
+
+# Database
+db.sqlite3
+*.sqlite3
+
+# Django
+staticfiles/
+media/
+*.mo
+*.pot
+*.po
+local_settings.py
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Project specific
+datos_*.json
+backup_*.json
