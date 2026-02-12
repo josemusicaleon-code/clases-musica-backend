@@ -1,16 +1,27 @@
 """
-Django settings - MODO DIAGNÓSTICO FINAL
+Django settings for miapp project.
+Configuración definitiva para producción con Supabase
 """
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+import dj_database_url
 
+load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# TODO HARCODEADO - SIN VARIABLES DE ENTORNO
-SECRET_KEY = 'django-insecure-diagnostico-final-2026'
-DEBUG = True
-ALLOWED_HOSTS = ['*']
+# ========== SEGURIDAD ==========
+# SECRET_KEY con valor por defecto para producción (NO DEPENDE DE ENV VAR)
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-produccion-definitiva-2026')
 
+# DEBUG forzado a False en producción (se puede override por env var)
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
+
+# ALLOWED_HOSTS - Acepta cualquier host en producción (ajustable por env var)
+ALLOWED_HOSTS = ['*']
+# Si quieres restringir, usa: ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
+
+# ========== APLICACIONES ==========
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -26,6 +37,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -39,37 +51,81 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'miapp.urls'
 WSGI_APPLICATION = 'miapp.wsgi.application'
 
-# SQLITE - SIN POSTGRESQL
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+# ========== BASE DE DATOS - SUPABASE ==========
+# SOLO usa DATABASE_URL. NADA más.
+if os.getenv('DATABASE_URL'):
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=os.getenv('DATABASE_URL'),
+            conn_max_age=600,
+            ssl_require=True,
+        )
     }
-}
+else:
+    # Fallback a SQLite para desarrollo local sin Supabase
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
-AUTH_PASSWORD_VALIDATORS = []
+# ========== VALIDACIÓN CONTRASEÑAS ==========
+AUTH_PASSWORD_VALIDATORS = [
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
+]
+
+# ========== INTERNACIONALIZACIÓN ==========
 LANGUAGE_CODE = 'es-es'
 TIME_ZONE = 'America/Bogota'
 USE_I18N = True
 USE_TZ = True
 
+# ========== ARCHIVOS ESTÁTICOS Y MEDIA ==========
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# CORS - TODO ABIERTO
-CORS_ALLOW_ALL_ORIGINS = True
+# ========== CORS ==========
+CORS_ALLOW_ALL_ORIGINS = False
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "https://clases-musica-backend.onrender.com",
+]
+
+if os.getenv('CORS_ALLOWED_ORIGINS'):
+    extra = os.getenv('CORS_ALLOWED_ORIGINS').split(',')
+    CORS_ALLOWED_ORIGINS.extend([o.strip() for o in extra if o.strip()])
+
 CORS_ALLOW_CREDENTIALS = True
 
+# ========== REST FRAMEWORK ==========
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [],
     'DEFAULT_PERMISSION_CLASSES': [],
 }
 
-# SEGURIDAD - COMPLETAMENTE DESHABILITADA
-SECURE_SSL_REDIRECT = False
-SESSION_COOKIE_SECURE = False
-CSRF_COOKIE_SECURE = False
-SECURE_HSTS_SECONDS = 0
-CSRF_TRUSTED_ORIGINS = []
+# ========== SEGURIDAD PRODUCCIÓN ==========
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_SSL_REDIRECT = False  # Render ya maneja SSL
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 0  # Desactivado para evitar problemas
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = False
+    SECURE_HSTS_PRELOAD = False
+    
+    # CSRF Trusted Origins
+    CSRF_TRUSTED_ORIGINS = [
+        o.strip() for o in CORS_ALLOWED_ORIGINS 
+        if o.strip().startswith(('http://', 'https://'))
+    ]
