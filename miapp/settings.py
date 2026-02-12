@@ -32,13 +32,12 @@ if not SECRET_KEY:
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 # ✅ PRODUCCIÓN: Configurar ALLOWED_HOSTS desde variable de entorno
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
-ALLOWED_HOSTS = [host.strip() for host in ALLOWED_HOSTS if host.strip()]
+# Reemplaza TODO el bloque de ALLOWED_HOSTS con:
+ALLOWED_HOSTS = ['*']
 
-if not ALLOWED_HOSTS:
-    ALLOWED_HOSTS = ['localhost', '127.0.0.1']
-    
-print("🔧 ALLOWED_HOSTS:", ALLOWED_HOSTS)
+# Y al final del archivo, agrega:
+CSRF_TRUSTED_ORIGINS = ['https://*.onrender.com']
+CORS_ALLOW_ALL_ORIGINS = True
 
 
 # Application definition
