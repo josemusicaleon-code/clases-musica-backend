@@ -91,6 +91,7 @@ WSGI_APPLICATION = 'miapp.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
+# Reemplaza TODO el bloque de DATABASES con esto:
 import dj_database_url
 
 if os.getenv('DATABASE_URL'):
@@ -98,20 +99,26 @@ if os.getenv('DATABASE_URL'):
         'default': dj_database_url.config(
             default=os.getenv('DATABASE_URL'),
             conn_max_age=600,
-            conn_health_checks=True,
             ssl_require=True,
         )
+    }
+elif os.getenv('DB_HOST'):  # NUEVO: variables separadas
+    DATABASES = {
+        'default': {
+            'ENGINE': os.getenv('DB_ENGINE', 'django.db.backends.postgresql'),
+            'NAME': os.getenv('DB_NAME', 'postgres'),
+            'USER': os.getenv('DB_USER', 'postgres'),
+            'PASSWORD': os.getenv('DB_PASSWORD', ''),
+            'HOST': os.getenv('DB_HOST', ''),
+            'PORT': os.getenv('DB_PORT', '5432'),
+            'OPTIONS': {
+                'sslmode': 'require'
+            }
+        }
     }
 else:
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.getenv('DB_NAME', 'postgres'),
-            'USER': os.getenv('DB_USER', 'postgres'),
-            'PASSWORD': os.getenv('DB_PASSWORD', ''),
-            'HOST': os.getenv('DB_HOST', 'localhost'),
-            'PORT': os.getenv('DB_PORT', '5432'),
-        } if os.getenv('DB_HOST') else {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': BASE_DIR / 'db.sqlite3',
         }
