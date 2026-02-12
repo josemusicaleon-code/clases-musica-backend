@@ -35,10 +35,6 @@ DEBUG = os.getenv('DEBUG', 'False') == 'True'
 # Reemplaza TODO el bloque de ALLOWED_HOSTS con:
 ALLOWED_HOSTS = ['*']
 
-# Y al final del archivo, agrega:
-CSRF_TRUSTED_ORIGINS = ['https://*.onrender.com']
-CORS_ALLOW_ALL_ORIGINS = True
-
 
 # Application definition
 INSTALLED_APPS = [
@@ -200,9 +196,6 @@ if not DEBUG:
     SECURE_HSTS_PRELOAD = False
     
     # ✅ Trusted origins para CSRF - SOLO URLs válidas
-    CSRF_TRUSTED_ORIGINS = [
-        origin.strip() 
-        for origin in CORS_ALLOWED_ORIGINS 
-        if origin.strip().startswith(('http://', 'https://'))
-    ]
-    print("🔧 CSRF_TRUSTED_ORIGINS:", CSRF_TRUSTED_ORIGINS)
+    # Y al final del archivo, agrega:
+CSRF_TRUSTED_ORIGINS = ['https://*.onrender.com']
+CORS_ALLOW_ALL_ORIGINS = True
