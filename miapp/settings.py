@@ -11,11 +11,10 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 import os
 from dotenv import load_dotenv
+from pathlib import Path
+
 # Cargar variables de entorno desde el archivo .env
 load_dotenv()
-
-
-from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,23 +24,24 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-# ✅ PRODUCCIÓN: SECRET_KEY obligatorio en producción
 SECRET_KEY = os.getenv('SECRET_KEY')
 if not SECRET_KEY:
     raise ValueError("❌ SECRET_KEY no está configurada en variables de entorno")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# ✅ PRODUCCIÓN: DEBUG debe ser False en producción
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 # ✅ PRODUCCIÓN: Configurar ALLOWED_HOSTS desde variable de entorno
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
-if not ALLOWED_HOSTS or ALLOWED_HOSTS == ['']:
+ALLOWED_HOSTS = [host.strip() for host in ALLOWED_HOSTS if host.strip()]
+
+if not ALLOWED_HOSTS:
     ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+    
+print("🔧 ALLOWED_HOSTS:", ALLOWED_HOSTS)
 
 
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -49,7 +49,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
- 
+    
     'rest_framework',
     'corsheaders',
     'estudiantes',
@@ -58,7 +58,6 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    # ✅ PRODUCCIÓN: Whitenoise para archivos estáticos
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
@@ -68,7 +67,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    ]
+]
 
 ROOT_URLCONF = 'miapp.urls'
 
@@ -92,21 +91,18 @@ WSGI_APPLICATION = 'miapp.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
-
-# ✅ PRODUCCIÓN: Configuración de base de datos con PostgreSQL
 import dj_database_url
 
-# Si existe DATABASE_URL (Railway, Heroku, etc.), úsala
 if os.getenv('DATABASE_URL'):
     DATABASES = {
         'default': dj_database_url.config(
             default=os.getenv('DATABASE_URL'),
             conn_max_age=600,
             conn_health_checks=True,
+            ssl_require=True,
         )
     }
 else:
-    # Configuración manual para desarrollo/Supabase
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
@@ -123,8 +119,6 @@ else:
 
 
 # Password validation
-# https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -142,8 +136,6 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 # Internationalization
-# https://docs.djangoproject.com/en/6.0/topics/i18n/
-
 LANGUAGE_CODE = 'es-es'
 TIME_ZONE = 'America/Bogota'
 USE_I18N = True
@@ -151,11 +143,14 @@ USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/6.0/howto/static-files/
-
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# Media files
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
 
 # ✅ PRODUCCIÓN: Configuración de CORS
 CORS_ALLOW_ALL_ORIGINS = False
@@ -166,10 +161,9 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:5173",
 ]
 
-# Agregar orígenes adicionales desde variable de entorno (para producción)
 if os.getenv('CORS_ALLOWED_ORIGINS'):
     extra_origins = os.getenv('CORS_ALLOWED_ORIGINS').split(',')
-    CORS_ALLOWED_ORIGINS.extend(extra_origins)
+    CORS_ALLOWED_ORIGINS.extend([origin.strip() for origin in extra_origins if origin.strip()])
 
 CORS_ALLOW_CREDENTIALS = True
 
@@ -178,29 +172,31 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [],
 }
 
-# Media files
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
 
-# ✅ PRODUCCIÓN: Configuraciones de seguridad adicionales
+# ✅ PRODUCCIÓN: Configuraciones de seguridad para Render
 if not DEBUG:
-    # ✅ Configuración para Render (proxy inverso)
+    # Configuración específica para Render
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     SECURE_SSL_REDIRECT = False  # Render ya maneja SSL
     
-    # ✅ Seguridad de cookies
+    # Seguridad de cookies
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     
-    # ✅ Headers de seguridad
+    # Headers de seguridad
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
     X_FRAME_OPTIONS = 'DENY'
     
-    # ✅ HSTS - Desactivado temporalmente para pruebas
+    # HSTS - Desactivado para pruebas
     SECURE_HSTS_SECONDS = 0
     SECURE_HSTS_INCLUDE_SUBDOMAINS = False
     SECURE_HSTS_PRELOAD = False
     
-    # ✅ Trusted origins para CSRF
-    CSRF_TRUSTED_ORIGINS = CORS_ALLOWED_ORIGINS.copy()
+    # ✅ Trusted origins para CSRF - SOLO URLs válidas
+    CSRF_TRUSTED_ORIGINS = [
+        origin.strip() 
+        for origin in CORS_ALLOWED_ORIGINS 
+        if origin.strip().startswith(('http://', 'https://'))
+    ]
+    print("🔧 CSRF_TRUSTED_ORIGINS:", CSRF_TRUSTED_ORIGINS)
