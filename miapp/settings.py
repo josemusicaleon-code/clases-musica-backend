@@ -184,20 +184,23 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 # ✅ PRODUCCIÓN: Configuraciones de seguridad adicionales
 if not DEBUG:
-    # Seguridad SSL
-    SECURE_SSL_REDIRECT = True
+    # ✅ Configuración para Render (proxy inverso)
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_SSL_REDIRECT = False  # Render ya maneja SSL
+    
+    # ✅ Seguridad de cookies
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     
-    # Seguridad de headers
+    # ✅ Headers de seguridad
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
     X_FRAME_OPTIONS = 'DENY'
     
-    # HSTS (HTTP Strict Transport Security)
-    SECURE_HSTS_SECONDS = 31536000  # 1 año
-    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-    SECURE_HSTS_PRELOAD = True
+    # ✅ HSTS - Desactivado temporalmente para pruebas
+    SECURE_HSTS_SECONDS = 0
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = False
+    SECURE_HSTS_PRELOAD = False
     
-    # Trusted origins para CSRF
+    # ✅ Trusted origins para CSRF
     CSRF_TRUSTED_ORIGINS = CORS_ALLOWED_ORIGINS.copy()
