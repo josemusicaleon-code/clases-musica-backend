@@ -27,7 +27,7 @@ class PagoViewSet(viewsets.ModelViewSet):
         
         # Pagos pendientes (donde saldo_pendiente > 0)
         pagos_pendientes = Pago.objects.filter(
-            monto_pagado__lt=models.F('monto')
+            monto_pagado__lt=F('monto')
         ).count()
         
         # Calcular saldo total pendiente
@@ -36,7 +36,7 @@ class PagoViewSet(viewsets.ModelViewSet):
         
         # Estudiantes con pagos pendientes
         estudiantes_con_deuda = Estudiante.objects.filter(
-            pagos__monto_pagado__lt=models.F('pagos__monto')
+            pagos__monto_pagado__lt=F('pagos__monto')
         ).distinct().count()
         
         return Response({
