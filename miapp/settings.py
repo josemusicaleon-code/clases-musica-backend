@@ -84,6 +84,24 @@ TIME_ZONE = 'America/Bogota'
 USE_I18N = True
 USE_TZ = True
 
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.messages',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
+]
+
 # ========== ARCHIVOS ESTÁTICOS Y MEDIA ==========
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
@@ -100,6 +118,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "https://clases-musica-backend.onrender.com",
+    "https://joseLeonLanau.pythonanywhere.com",
 ]
 
 if os.getenv('CORS_ALLOWED_ORIGINS'):
