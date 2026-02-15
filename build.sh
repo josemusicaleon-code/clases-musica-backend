@@ -18,7 +18,7 @@ echo "Ejecutando migraciones de base de datos..."
 python manage.py migrate --noinput
 
 echo ""
-echo "Verificando superusuario..."
+echo "Creando superusuario si no existe..."
 python manage.py shell << PYEOF
 import os
 from django.contrib.auth import get_user_model
