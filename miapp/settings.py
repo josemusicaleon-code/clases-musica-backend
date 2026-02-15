@@ -18,7 +18,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-produccion-definitiva-2026
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 # ALLOWED_HOSTS - Acepta cualquier host en producción (ajustable por env var)
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['clases-musica-backend.onrender.com', '.render.com', 'joseLeonLanau.pythonanywhere.com', '.pythonanywhere.com']
 # Si quieres restringir, usa: ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
 
 # ========== APLICACIONES ==========
