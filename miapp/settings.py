@@ -130,6 +130,11 @@ if os.getenv('CORS_ALLOWED_ORIGINS'):
 
 CORS_ALLOW_CREDENTIALS = True
 
+# Cookie settings para producción
+SESSION_COOKIE_AGE = 60 * 60 * 24 * 7  # 1 semana
+SESSION_COOKIE_NAME = 'sessionid'
+CSRF_COOKIE_NAME = 'csrftoken'
+
 # ========== REST FRAMEWORK ==========
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
@@ -144,8 +149,18 @@ REST_FRAMEWORK = {
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     SECURE_SSL_REDIRECT = False  # Render ya maneja SSL
+    
+    # Cookie settings para cross-origin
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
+    
+    # SameSite=None para permitir cookies en cross-origin requests
+    SESSION_COOKIE_SAMESITE = 'Lax'
+    CSRF_COOKIE_SAMESITE = 'Lax'
+    
+    # Dominio de la cookie (ajusta según sea necesario)
+    # SESSION_COOKIE_DOMAIN = '.pythonanywhere.com'
+    
     SECURE_HSTS_SECONDS = 0  # Desactivado para evitar problemas
     SECURE_HSTS_INCLUDE_SUBDOMAINS = False
     SECURE_HSTS_PRELOAD = False
