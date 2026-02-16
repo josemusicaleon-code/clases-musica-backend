@@ -17,7 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from estudiantes.views import EstudianteViewSet
+from estudiantes.views import EstudianteViewSet, LoginView, LogoutView, CurrentUserView
 from pagos.views import PagoViewSet
 from clases.views import ClaseViewSet
 
@@ -29,5 +29,8 @@ router.register(r'clases', ClaseViewSet)
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
+    path('api/auth/login/', LoginView.as_view(), name='login'),
+    path('api/auth/logout/', LogoutView.as_view(), name='logout'),
+    path('api/auth/me/', CurrentUserView.as_view(), name='current_user'),
     path('api-auth/', include('rest_framework.urls')),
 ]
