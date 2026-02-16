@@ -139,34 +139,35 @@ CSRF_COOKIE_NAME = 'csrftoken'
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
 }
 
+# Token authentication
+REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'].append('rest_framework.authentication.TokenAuthentication')
+
 # ========== SEGURIDAD PRODUCCIÓN ==========
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-    SECURE_SSL_REDIRECT = False  # Render ya maneja SSL
+    SECURE_SSL_REDIRECT = False
     
     # Cookie settings para cross-origin
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     
     # SameSite=None para permitir cookies en cross-origin requests
-    SESSION_COOKIE_SAMESITE = 'Lax'
-    CSRF_COOKIE_SAMESITE = 'Lax'
+    SESSION_COOKIE_SAMESITE = 'None'
+    CSRF_COOKIE_SAMESITE = 'None'
     
-    # Dominio de la cookie (ajusta según sea necesario)
-    # SESSION_COOKIE_DOMAIN = '.pythonanywhere.com'
-    
-    SECURE_HSTS_SECONDS = 0  # Desactivado para evitar problemas
+    SECURE_HSTS_SECONDS = 0
     SECURE_HSTS_INCLUDE_SUBDOMAINS = False
     SECURE_HSTS_PRELOAD = False
     
     # CSRF Trusted Origins
     CSRF_TRUSTED_ORIGINS = [
-        o.strip() for o in CORS_ALLOWED_ORIGINS 
-        if o.strip().startswith(('http://', 'https://'))
+        'https://clases-musica-frontend.vercel.app',
+        'https://joseleonlanau.pythonanywhere.com',
     ]

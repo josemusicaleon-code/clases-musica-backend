@@ -17,6 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
+from rest_framework.authtoken.views import obtain_auth_token
 from estudiantes.views import EstudianteViewSet, LoginView, LogoutView, CurrentUserView
 from pagos.views import PagoViewSet
 from clases.views import ClaseViewSet
@@ -32,5 +33,6 @@ urlpatterns = [
     path('api/auth/login/', LoginView.as_view(), name='login'),
     path('api/auth/logout/', LogoutView.as_view(), name='logout'),
     path('api/auth/me/', CurrentUserView.as_view(), name='current_user'),
+    path('api/auth/token/', obtain_auth_token, name='api_token_auth'),
     path('api-auth/', include('rest_framework.urls')),
 ]
