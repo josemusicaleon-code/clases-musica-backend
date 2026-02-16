@@ -123,8 +123,10 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 if os.getenv('CORS_ALLOWED_ORIGINS'):
-    extra = os.getenv('CORS_ALLOWED_ORIGINS').split(',')
-    CORS_ALLOWED_ORIGINS.extend([o.strip() for o in extra if o.strip()])
+    extra = os.getenv('CORS_ALLOWED_ORIGINS')
+    if extra:
+        extra_origins = extra.split(',')
+        CORS_ALLOWED_ORIGINS.extend([o.strip() for o in extra_origins if o.strip()])
 
 CORS_ALLOW_CREDENTIALS = True
 
