@@ -138,16 +138,12 @@ CSRF_COOKIE_NAME = 'csrftoken'
 # ========== REST FRAMEWORK ==========
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
 }
-
-# Token authentication
-REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'].append('rest_framework.authentication.TokenAuthentication')
 
 # ========== SEGURIDAD PRODUCCIÓN ==========
 if not DEBUG:

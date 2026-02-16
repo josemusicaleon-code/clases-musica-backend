@@ -2,6 +2,7 @@ from rest_framework import viewsets
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate, login, logout
 from .models import Estudiante
 from .serializers import EstudianteSerializer
@@ -25,9 +26,10 @@ class LoginView(APIView):
         user = authenticate(request, username=username, password=password)
 
         if user is not None:
-            login(request, user)
+            token, created = Token.objects.get_or_create(user=user)
             return Response({
                 'success': True,
+                'token': token.key,
                 'user': {
                     'id': user.id,
                     'username': user.username,
@@ -41,6 +43,9 @@ class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
+        token = Token.objects.filter(user=request.user).first()
+        if token:
+            token.delete()
         logout(request)
         return Response({'success': True})
 
