@@ -12,3 +12,6 @@ class Clase(models.Model):
     
     def __str__(self):
         return f"Clase {self.id} - {self.estudiante.nombre}"
+
+    class Meta:
+        ordering = ['-fecha']
